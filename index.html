@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Alyssa's Love Island Birthday 🏝️</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏝️</text></svg>">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<style>
+  :root{
+    --plum:#4A0D3F;
+    --plum-deep:#33082C;
+    --pink:#FF2D78;
+    --coral:#FF6B4A;
+    --mango:#FFB13D;
+    --pool:#3FD8C4;
+    --paper:#FFF7F0;
+    --ink:#3A0B31;
+    --display:'Avenir Next Condensed','Avenir Next','Helvetica Neue',Helvetica,Arial,sans-serif;
+    --script:'Snell Roundhand','Savoye LET','Brush Script MT',cursive;
+    --body:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',Arial,sans-serif;
+  }
+  html,body{margin:0;padding:0}
+  body{
+    font-family:var(--body);
+    background:linear-gradient(180deg,var(--plum-deep) 0%,var(--plum) 14%,var(--pink) 42%,var(--coral) 68%,var(--mango) 100%);
+    color:#fff;
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+  .stage{
+    position:relative;
+    max-width:430px;
+    margin:0 auto;
+    padding:22px 18px 56px;
+    box-sizing:border-box;
+  }
+
+  /* ambient hearts */
+  .heart-float{
+    position:absolute;
+    font-size:20px;
+    opacity:.22;
+    pointer-events:none;
+    animation:drift 9s ease-in-out infinite;
+  }
+  @keyframes drift{
+    0%,100%{transform:translateY(0) rotate(-8deg)}
+    50%{transform:translateY(-26px) rotate(10deg)}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .heart-float,.notif,.crown{animation:none !important}
+  }
+
+  /* palms */
+  .palm{
+    position:absolute;
+    opacity:.16;
+    pointer-events:none;
+  }
+  .palm svg{display:block}
+
+  /* ================= TEXT NOTIFICATION ================= */
+  .notif{
+    background:rgba(255,247,240,.97);
+    color:#111;
+    border-radius:20px;
+    padding:12px 16px 13px;
+    box-shadow:0 12px 34px rgba(51,8,44,.45);
+    display:flex;
+    gap:12px;
+    align-items:flex-start;
+    position:relative;
+    animation:buzz .5s ease .8s 2;
+  }
+  @keyframes buzz{
+    0%,100%{transform:translateX(0)}
+    25%{transform:translateX(-3px) rotate(-.4deg)}
+    75%{transform:translateX(3px) rotate(.4deg)}
+  }
+  .notif .app-icon{
+    width:40px;height:40px;flex:none;
+    border-radius:10px;
+    background:linear-gradient(160deg,var(--pink),var(--coral));
+    display:flex;align-items:center;justify-content:center;
+    font-size:22px;
+  }
+  .notif .n-meta{
+    display:flex;justify-content:space-between;gap:8px;
+    font-size:11px;letter-spacing:.14em;color:#8a8a8e;
+    text-transform:uppercase;font-weight:600;
+    margin-bottom:2px;
+  }
+  .notif .n-body{flex:1;min-width:0}
+  .notif .n-title{font-weight:800;font-size:15px;letter-spacing:.02em}
+  .notif .n-text{font-size:14px;line-height:1.35;color:#2c2c2e;margin-top:2px}
+
+  /* ================= HERO ================= */
+  .hero{
+    text-align:center;
+    padding:38px 0 8px;
+    position:relative;
+  }
+  .eyebrow{
+    font-family:var(--display);
+    font-weight:700;
+    font-size:13px;
+    letter-spacing:.34em;
+    text-transform:uppercase;
+    color:#FFD9A8;
+    margin-bottom:14px;
+  }
+  .script-lockup{
+    font-family:var(--script);
+    font-size:44px;
+    line-height:1;
+    color:#fff;
+    text-shadow:0 3px 0 rgba(58,11,49,.35);
+    transform:rotate(-4deg);
+    margin-bottom:2px;
+  }
+  h1{
+    font-family:var(--display);
+    font-weight:800;
+    font-style:italic;
+    font-size:clamp(56px,17vw,74px);
+    line-height:.9;
+    letter-spacing:-.01em;
+    margin:6px 0 0;
+    text-transform:uppercase;
+    text-wrap:balance;
+    color:#fff;
+    text-shadow:
+      0 4px 0 rgba(58,11,49,.5),
+      0 14px 30px rgba(51,8,44,.4);
+  }
+  h1 .hollow{
+    color:transparent;
+    -webkit-text-stroke:2.5px #fff;
+    text-shadow:none;
+  }
+  .hero-heart{
+    display:inline-block;
+    margin:14px auto 0;
+    background:var(--paper);
+    color:var(--pink);
+    font-family:var(--display);
+    font-weight:800;
+    font-style:italic;
+    text-transform:uppercase;
+    letter-spacing:.16em;
+    font-size:14px;
+    padding:10px 22px;
+    border-radius:999px;
+    box-shadow:0 8px 24px rgba(51,8,44,.4);
+  }
+  .hero-sub{
+    margin-top:14px;
+    font-size:15px;
+    line-height:1.5;
+    color:rgba(255,255,255,.92);
+  }
+  .hero-sub b{color:#FFE3B8}
+
+  /* ================= POLAROIDS ================= */
+  .polaroids{
+    margin-top:30px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:18px 14px;
+  }
+  .polaroid{
+    background:#fff;
+    padding:8px 8px 34px;
+    border-radius:4px;
+    box-shadow:0 14px 30px rgba(51,8,44,.4);
+    position:relative;
+    transition:transform .25s ease;
+  }
+  body.edit-mode .polaroid{cursor:pointer}
+  .polaroid:nth-child(1){transform:rotate(-3.5deg)}
+  .polaroid:nth-child(2){transform:rotate(2.5deg) translateY(10px)}
+  .polaroid:nth-child(3){transform:rotate(2deg)}
+  .polaroid:nth-child(4){transform:rotate(-2.5deg) translateY(8px)}
+  body.edit-mode .polaroid:hover{transform:rotate(0deg) scale(1.03)}
+  .polaroid:focus-visible{outline:3px solid var(--pool);outline-offset:3px}
+  .polaroid .tape{
+    position:absolute;
+    top:-10px;left:50%;
+    width:74px;height:22px;
+    transform:translateX(-50%) rotate(-2deg);
+    background:rgba(255,225,150,.75);
+    box-shadow:0 2px 5px rgba(51,8,44,.18);
+  }
+  .polaroid .photo{
+    aspect-ratio:1/1.05;
+    background:linear-gradient(150deg,#FFE0EC,#FFD1C2);
+    background-size:cover;
+    background-position:center;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    color:#B04A78;
+    font-size:12.5px;
+    font-weight:700;
+    line-height:1.4;
+    padding:0 10px;
+    box-sizing:border-box;
+  }
+  .polaroid.filled .photo{color:transparent}
+  .polaroid .caption{
+    position:absolute;
+    bottom:8px;left:0;right:0;
+    text-align:center;
+    font-family:var(--script);
+    font-size:19px;
+    color:#7A2B5C;
+  }
+  .polaroid input{display:none}
+  .photo-hint{
+    grid-column:1 / -1;
+    text-align:center;
+    font-size:12.5px;
+    letter-spacing:.08em;
+    color:rgba(255,255,255,.85);
+    margin-top:2px;
+    display:none;
+  }
+  body.edit-mode .photo-hint{display:block}
+
+  /* ================= SECTION HEADINGS ================= */
+  h2{
+    font-family:var(--display);
+    font-weight:800;
+    font-style:italic;
+    text-transform:uppercase;
+    font-size:26px;
+    letter-spacing:.05em;
+    text-align:center;
+    margin:44px 0 4px;
+    text-shadow:0 3px 0 rgba(58,11,49,.4);
+  }
+  .h2-script{
+    font-family:var(--script);
+    text-align:center;
+    font-size:26px;
+    color:#FFE3B8;
+    transform:rotate(-2deg);
+    margin-bottom:16px;
+  }
+
+  /* ================= ITINERARY ================= */
+  .stops{display:flex;flex-direction:column;gap:14px}
+  .stop{
+    background:var(--paper);
+    color:var(--ink);
+    border-radius:18px;
+    padding:16px 16px 15px 14px;
+    display:flex;
+    gap:13px;
+    box-shadow:0 12px 28px rgba(51,8,44,.38);
+    position:relative;
+    overflow:hidden;
+  }
+  .stop::before{
+    content:"";
+    position:absolute;
+    left:0;top:0;bottom:0;
+    width:6px;
+    background:linear-gradient(180deg,var(--pink),var(--coral));
+  }
+  .stop .emoji{
+    flex:none;
+    width:48px;height:48px;
+    border-radius:14px;
+    background:linear-gradient(160deg,#FFE0EC,#FFE9D2);
+    display:flex;align-items:center;justify-content:center;
+    font-size:26px;
+    margin-top:2px;
+  }
+  .stop .s-body{flex:1;min-width:0}
+  .stop .s-time{
+    font-family:var(--display);
+    font-weight:700;
+    font-size:12px;
+    letter-spacing:.26em;
+    text-transform:uppercase;
+    color:var(--pink);
+    font-variant-numeric:tabular-nums;
+  }
+  .stop .s-name{
+    font-family:var(--display);
+    font-weight:800;
+    font-style:italic;
+    text-transform:uppercase;
+    font-size:21px;
+    line-height:1.05;
+    margin:3px 0 4px;
+  }
+  .stop .s-detail{font-size:13.5px;line-height:1.45;color:#6B3A5E}
+  .stop .s-detail b{color:var(--ink)}
+  .btn-pill{
+    display:inline-block;
+    margin-top:9px;
+    margin-right:8px;
+    background:linear-gradient(135deg,var(--pink),var(--coral));
+    color:#fff;
+    text-decoration:none;
+    font-family:var(--display);
+    font-weight:800;
+    font-style:italic;
+    text-transform:uppercase;
+    letter-spacing:.1em;
+    font-size:14px;
+    padding:9px 18px;
+    border-radius:999px;
+    box-shadow:0 6px 16px rgba(255,45,120,.45);
+    border:none;
+    cursor:pointer;
+  }
+  .btn-pill:active{transform:scale(.97)}
+  .btn-pill.ghost{
+    background:#fff;
+    color:var(--pink);
+    box-shadow:0 4px 12px rgba(51,8,44,.18);
+    border:1.5px solid #FFC3D8;
+  }
+  .stop .s-tag{
+    display:inline-block;
+    background:var(--pool);
+    color:#083B33;
+    font-size:10.5px;
+    font-weight:800;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    padding:3px 9px;
+    border-radius:999px;
+    margin-left:6px;
+    vertical-align:2px;
+  }
+
+  /* ================= ISLANDERS / RSVP ================= */
+  .rsvp-count{
+    text-align:center;
+    font-family:var(--display);
+    font-weight:700;
+    letter-spacing:.2em;
+    text-transform:uppercase;
+    font-size:12px;
+    color:#FFE3B8;
+    margin:-6px 0 14px;
+  }
+  .islanders{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:9px;
+  }
+  .chip{
+    background:rgba(255,247,240,.16);
+    border:1.5px solid rgba(255,247,240,.55);
+    backdrop-filter:blur(4px);
+    color:#fff;
+    font-family:var(--display);
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:.12em;
+    font-size:13.5px;
+    padding:8px 16px;
+    border-radius:999px;
+    cursor:pointer;
+    position:relative;
+    transition:transform .15s ease,background .2s ease;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .chip:active{transform:scale(.94)}
+  .chip:focus-visible{outline:3px solid var(--pool);outline-offset:2px}
+  .chip.going{
+    background:var(--pool);
+    border-color:var(--pool);
+    color:#083B33;
+    box-shadow:0 6px 18px rgba(63,216,196,.4);
+  }
+  .chip.going::after{
+    content:" ✅";
+  }
+  .chip.bday{
+    background:var(--paper);
+    color:var(--pink);
+    border-color:var(--paper);
+    font-weight:800;
+    font-style:italic;
+    box-shadow:0 8px 20px rgba(51,8,44,.35);
+  }
+  .chip.bday.going{
+    background:var(--paper);
+    color:var(--pink);
+  }
+  .crown{
+    position:absolute;
+    top:-17px;right:-8px;
+    font-size:20px;
+    transform:rotate(18deg);
+    animation:drift 5s ease-in-out infinite;
+  }
+  .rsvp-hint{
+    text-align:center;
+    font-size:12.5px;
+    color:rgba(255,255,255,.85);
+    margin-top:14px;
+    letter-spacing:.06em;
+  }
+
+  /* ================= RSVP MODAL ================= */
+  .modal-veil{
+    position:fixed;
+    inset:0;
+    background:rgba(51,8,44,.6);
+    backdrop-filter:blur(3px);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:50;
+    padding:24px;
+  }
+  .modal-veil.open{display:flex}
+  .modal{
+    background:var(--paper);
+    color:var(--ink);
+    border-radius:22px;
+    padding:26px 22px 22px;
+    max-width:320px;
+    width:100%;
+    text-align:center;
+    box-shadow:0 24px 60px rgba(51,8,44,.55);
+  }
+  .modal .m-emoji{font-size:44px;line-height:1}
+  .modal .m-title{
+    font-family:var(--display);
+    font-weight:800;
+    font-style:italic;
+    text-transform:uppercase;
+    font-size:22px;
+    margin:10px 0 4px;
+  }
+  .modal .m-text{font-size:14px;line-height:1.5;color:#6B3A5E;margin-bottom:16px}
+  .modal .m-actions{display:flex;flex-direction:column;gap:9px}
+  .modal .btn-pill{margin:0}
+
+  /* toast */
+  .toast{
+    position:fixed;
+    left:50%;
+    bottom:26px;
+    transform:translateX(-50%) translateY(80px);
+    background:rgba(51,8,44,.92);
+    color:#fff;
+    font-size:14px;
+    font-weight:600;
+    padding:11px 20px;
+    border-radius:999px;
+    box-shadow:0 10px 30px rgba(0,0,0,.35);
+    transition:transform .3s ease;
+    z-index:60;
+    max-width:85vw;
+    text-align:center;
+  }
+  .toast.show{transform:translateX(-50%) translateY(0)}
+
+  /* ================= FOOTER ================= */
+  .rsvp-footer{
+    margin-top:46px;
+    text-align:center;
+    background:rgba(51,8,44,.34);
+    border:1.5px solid rgba(255,247,240,.35);
+    border-radius:20px;
+    padding:22px 18px 24px;
+  }
+  .rsvp-footer .r-script{
+    font-family:var(--script);
+    font-size:30px;
+    color:#FFE3B8;
+    transform:rotate(-2deg);
+  }
+  .rsvp-footer .r-line{
+    font-family:var(--display);
+    font-weight:800;
+    font-style:italic;
+    text-transform:uppercase;
+    font-size:20px;
+    letter-spacing:.06em;
+    margin-top:6px;
+  }
+  .rsvp-footer .r-fine{
+    margin-top:12px;
+    font-size:11.5px;
+    line-height:1.6;
+    color:rgba(255,255,255,.75);
+  }
+  .date-strip{
+    margin-top:22px;
+    text-align:center;
+    font-family:var(--display);
+    font-weight:700;
+    letter-spacing:.4em;
+    text-transform:uppercase;
+    font-size:11px;
+    color:rgba(255,255,255,.8);
+  }
+</style>
+</head>
+<body>
+<div class="stage">
+
+  <!-- ambient decoration -->
+  <span class="heart-float" style="top:150px;left:-2px;animation-delay:.4s">🩷</span>
+  <span class="heart-float" style="top:120px;right:6px;font-size:26px;animation-delay:1.6s">❤️</span>
+  <span class="heart-float" style="top:560px;left:4px;font-size:15px;animation-delay:2.4s">🧡</span>
+  <span class="heart-float" style="top:900px;right:2px;animation-delay:.9s">🩷</span>
+  <div class="palm" style="top:250px;right:-38px;width:120px">
+    <svg viewBox="0 0 100 140" width="120" height="168" aria-hidden="true">
+      <path d="M52 138 C50 100 49 70 50 48" stroke="#33082C" stroke-width="7" fill="none" stroke-linecap="round"/>
+      <path d="M50 48 C30 30 12 28 2 36 C20 38 38 44 50 48 Z" fill="#33082C"/>
+      <path d="M50 48 C68 28 88 26 98 34 C80 36 62 44 50 48 Z" fill="#33082C"/>
+      <path d="M50 48 C44 26 30 14 16 12 C32 20 44 34 50 48 Z" fill="#33082C"/>
+      <path d="M50 48 C56 26 70 12 86 10 C70 20 56 34 50 48 Z" fill="#33082C"/>
+      <path d="M50 48 C50 24 54 10 60 2 C54 16 51 34 50 48 Z" fill="#33082C"/>
+    </svg>
+  </div>
+  <div class="palm" style="top:1080px;left:-46px;width:120px;transform:scaleX(-1)">
+    <svg viewBox="0 0 100 140" width="130" height="182" aria-hidden="true">
+      <path d="M52 138 C50 100 49 70 50 48" stroke="#33082C" stroke-width="7" fill="none" stroke-linecap="round"/>
+      <path d="M50 48 C30 30 12 28 2 36 C20 38 38 44 50 48 Z" fill="#33082C"/>
+      <path d="M50 48 C68 28 88 26 98 34 C80 36 62 44 50 48 Z" fill="#33082C"/>
+      <path d="M50 48 C44 26 30 14 16 12 C32 20 44 34 50 48 Z" fill="#33082C"/>
+      <path d="M50 48 C56 26 70 12 86 10 C70 20 56 34 50 48 Z" fill="#33082C"/>
+      <path d="M50 48 C50 24 54 10 60 2 C54 16 51 34 50 48 Z" fill="#33082C"/>
+    </svg>
+  </div>
+
+  <!-- I GOT A TEXT -->
+  <div class="notif" role="note">
+    <div class="app-icon">💌</div>
+    <div class="n-body">
+      <div class="n-meta"><span>Messages</span><span>now</span></div>
+      <div class="n-title">I GOT A TEXT! 📱</div>
+      <div class="n-text">Islanders, it's time to couple up — <b>Alyssa</b> is turning another year hotter and you're invited to the villa. 🏝️</div>
+    </div>
+  </div>
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="eyebrow">★ A Very Special Episode ★</div>
+    <div class="script-lockup">love island presents</div>
+    <h1>Alyssa's<br><span class="hollow">Birthday</span></h1>
+    <div class="hero-heart">❤ Sat · July 11 · 2026 ❤</div>
+    <p class="hero-sub">One night. Three stops. Zero chance of getting <b>pied</b>.<br>Seafood boil → boba → HEAT Saturdays. 🦀🧋🔥</p>
+  </header>
+
+  <!-- POLAROIDS -->
+  <section class="polaroids" aria-label="Photos of the couple">
+    <div class="polaroid" tabindex="0" role="button" aria-label="Photo 1">
+      <div class="tape"></div>
+      <div class="photo">📸<br>pic of us here</div>
+      <div class="caption">my type on paper</div>
+      <input type="file" accept="image/*">
+    </div>
+    <div class="polaroid" tabindex="0" role="button" aria-label="Photo 2">
+      <div class="tape" style="transform:translateX(-50%) rotate(3deg)"></div>
+      <div class="photo">📸<br>pic of us here</div>
+      <div class="caption">100% my type</div>
+      <input type="file" accept="image/*">
+    </div>
+    <div class="polaroid" tabindex="0" role="button" aria-label="Photo 3">
+      <div class="tape" style="transform:translateX(-50%) rotate(-4deg)"></div>
+      <div class="photo">📸<br>pic of us here</div>
+      <div class="caption">coupled up ✓</div>
+      <input type="file" accept="image/*">
+    </div>
+    <div class="polaroid" tabindex="0" role="button" aria-label="Photo 4">
+      <div class="tape" style="transform:translateX(-50%) rotate(2deg)"></div>
+      <div class="photo">📸<br>pic of us here</div>
+      <div class="caption">the birthday girl 👑</div>
+      <input type="file" accept="image/*">
+    </div>
+    <div class="photo-hint" id="photoHint">edit mode: tap a frame to set a photo — everyone will see it 📱</div>
+  </section>
+
+  <!-- ITINERARY -->
+  <h2>Tonight's Episode</h2>
+  <div class="h2-script">three dates, one villa crew</div>
+  <div class="stops">
+    <div class="stop">
+      <div class="emoji">🦀</div>
+      <div class="s-body">
+        <div class="s-time">Stop 1 · 6:30 PM</div>
+        <div class="s-name">Seafood Boil</div>
+        <div class="s-detail"><b>The Submarine Crab</b><br>10130 Garden Grove Blvd, Ste 129<br>Garden Grove, CA 92844<br>Bibs on. Torpedo sauce. No mercy.</div>
+        <a class="btn-pill ghost" href="https://www.yelp.com/biz/the-submarine-crab-garden-grove-2" target="_blank" rel="noopener">Peek the menu on Yelp 🦞</a>
+      </div>
+    </div>
+    <div class="stop">
+      <div class="emoji">🧋</div>
+      <div class="s-body">
+        <div class="s-time">Stop 2 · 8:30 PM</div>
+        <div class="s-name">Boba Run</div>
+        <div class="s-detail">Location drops in the group chat.<br>Sugar up before the villa afterparty. 👀</div>
+      </div>
+    </div>
+    <div class="stop">
+      <div class="emoji">🔥</div>
+      <div class="s-body">
+        <div class="s-time">Stop 3 · 10:00 PM</div>
+        <div class="s-name">Heat Ultra Lounge<span class="s-tag">Free b4 11PM</span></div>
+        <div class="s-detail"><b>HEAT Saturdays</b> · hip hop, top 40, reggaeton<br>400 W Disney Way, Ste 214, Anaheim (GardenWalk)<br>Doors 9:30 PM · <b>free before 11 PM</b> — roll in with the crew at 10 · 21+ bring ID</div>
+        <a class="btn-pill" href="https://www.heatultraloungeoc.com/event/ev40934183953dt260711-heat-saturdays/" target="_blank" rel="noopener">Event info · Free b4 11 🔥</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ISLANDERS / RSVP -->
+  <h2>This Season's Islanders</h2>
+  <div class="h2-script">tap your name to couple up</div>
+  <div class="rsvp-count" id="rsvpCount">— islanders coupled up</div>
+  <div class="islanders" id="islanders"></div>
+  <div class="rsvp-hint">tap your name to RSVP ✅ — tap again if plans change 💔</div>
+
+  <!-- RSVP FOOTER -->
+  <div class="rsvp-footer">
+    <div class="r-script">got a text back?</div>
+    <div class="r-line">Tap your name above to couple up ✅</div>
+    <div class="r-fine">Heat is FREE before 11 PM — stick with the crew and we all get in for $0.<br>Club is 21+ · bring ID · dress like you're on the show. 🌅<br>Questions? Text Danzel.</div>
+  </div>
+
+  <div class="date-strip">Sat 07·11·26 &nbsp;·&nbsp; The Villa Is Open</div>
+</div>
+
+<!-- RSVP MODAL -->
+<div class="modal-veil" id="modalVeil">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="m-emoji" id="modalEmoji">💘</div>
+    <div class="m-title" id="modalTitle">Couple up?</div>
+    <div class="m-text" id="modalText"></div>
+    <div class="m-actions">
+      <button class="btn-pill" id="modalYes">I'm going! ✅</button>
+      <button class="btn-pill ghost" id="modalNo">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── FIREBASE ────────────────────────────────────────────────────────────────
+const FIREBASE_CONFIG = {
+  databaseURL: 'https://gen-lang-client-0119642855-default-rtdb.firebaseio.com'
+};
+const NS = 'alyssa-bday';
+let db = null;
+function initFirebase() {
+  try {
+    if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+    db = firebase.database();
+    return true;
+  } catch (e) { console.error('Firebase init error:', e); return false; }
+}
+
+// ── GUESTS ──────────────────────────────────────────────────────────────────
+const GUESTS = ['Alyssa','Danzel','Nancy','Trevor','Frank','Miguelito','Danny','Chris','Lydia','Andrew','Jason','Drew','Kevin','MK','Kelly','Dara','Maxine','Drei'];
+const BDAY_GIRL = 'Alyssa';
+let rsvps = {};
+
+const listEl = document.getElementById('islanders');
+const countEl = document.getElementById('rsvpCount');
+
+function renderList() {
+  listEl.innerHTML = '';
+  let going = 0;
+  GUESTS.forEach(name => {
+    const chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'chip';
+    chip.textContent = name;
+    if (name === BDAY_GIRL) {
+      chip.classList.add('bday');
+      const crown = document.createElement('span');
+      crown.className = 'crown';
+      crown.textContent = '👑';
+      chip.appendChild(crown);
+    }
+    if (rsvps[name] && rsvps[name].going) {
+      chip.classList.add('going');
+      going++;
+    }
+    chip.addEventListener('click', () => openRsvp(name));
+    listEl.appendChild(chip);
+  });
+  countEl.textContent = going + '/' + GUESTS.length + ' islanders coupled up';
+}
+
+// ── RSVP MODAL ──────────────────────────────────────────────────────────────
+const veil = document.getElementById('modalVeil');
+const mEmoji = document.getElementById('modalEmoji');
+const mTitle = document.getElementById('modalTitle');
+const mText = document.getElementById('modalText');
+const mYes = document.getElementById('modalYes');
+const mNo = document.getElementById('modalNo');
+let pendingName = null;
+
+function openRsvp(name) {
+  pendingName = name;
+  const isGoing = rsvps[name] && rsvps[name].going;
+  if (isGoing) {
+    mEmoji.textContent = '💔';
+    mTitle.textContent = name + ', leaving the villa?';
+    mText.textContent = 'You’re marked as going. Take yourself off the list?';
+    mYes.textContent = 'Take me off 💔';
+  } else {
+    mEmoji.textContent = '💘';
+    mTitle.textContent = 'Couple up as ' + name + '?';
+    mText.textContent = 'Sat July 11 · seafood boil → boba → HEAT Saturdays. Everyone will see you’re in.';
+    mYes.textContent = 'I’m going! ✅';
+  }
+  veil.classList.add('open');
+}
+function closeModal() { veil.classList.remove('open'); pendingName = null; }
+mNo.addEventListener('click', closeModal);
+veil.addEventListener('click', e => { if (e.target === veil) closeModal(); });
+
+mYes.addEventListener('click', () => {
+  const name = pendingName;
+  if (!name || !db) { closeModal(); return; }
+  const isGoing = rsvps[name] && rsvps[name].going;
+  const ref = db.ref(NS + '/rsvps/' + name);
+  const done = isGoing
+    ? ref.remove().then(() => toast(name + ' left the villa 💔'))
+    : ref.set({ going: true, ts: firebase.database.ServerValue.TIMESTAMP })
+        .then(() => toast(name + ' is coupled up! See you July 11 ✅'));
+  done.catch(() => toast('Hmm, that didn’t save — check your signal and try again'));
+  try { localStorage.setItem('li-my-name', name); } catch (e) {}
+  closeModal();
+});
+
+// ── TOAST ───────────────────────────────────────────────────────────────────
+const toastEl = document.getElementById('toast');
+let toastTimer = null;
+function toast(msg) {
+  toastEl.textContent = msg;
+  toastEl.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toastEl.classList.remove('show'), 3200);
+}
+
+// ── PHOTOS ──────────────────────────────────────────────────────────────────
+// Photos live in Firebase so every guest sees them. Uploading is only enabled
+// with ?edit in the URL (host mode) so guests can't accidentally replace them.
+const EDIT_MODE = new URLSearchParams(location.search).has('edit');
+if (EDIT_MODE) document.body.classList.add('edit-mode');
+const frames = document.querySelectorAll('.polaroid');
+
+function setPhoto(i, url) {
+  const frame = frames[i];
+  if (!frame || !url) return;
+  frame.querySelector('.photo').style.backgroundImage = 'url("' + url + '")';
+  frame.classList.add('filled');
+}
+
+frames.forEach((frame, i) => {
+  const input = frame.querySelector('input');
+  function openPicker(e) {
+    if (!EDIT_MODE) return;
+    if (e && e.target === input) return;
+    input.click();
+  }
+  frame.addEventListener('click', openPicker);
+  frame.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openPicker(); }
+  });
+  input.addEventListener('change', () => {
+    const file = input.files && input.files[0];
+    if (!file) return;
+    const img = new Image();
+    const objUrl = URL.createObjectURL(file);
+    img.onload = () => {
+      const max = 900;
+      const scale = Math.min(1, max / Math.max(img.width, img.height));
+      const c = document.createElement('canvas');
+      c.width = Math.round(img.width * scale);
+      c.height = Math.round(img.height * scale);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      const dataUrl = c.toDataURL('image/jpeg', 0.82);
+      setPhoto(i, dataUrl);
+      if (db) db.ref(NS + '/photos/' + i).set(dataUrl)
+        .then(() => toast('Photo saved — everyone can see it 📸'))
+        .catch(() => toast('Photo didn’t save — try a smaller pic'));
+      URL.revokeObjectURL(objUrl);
+    };
+    img.src = objUrl;
+  });
+});
+
+// ── BOOT ────────────────────────────────────────────────────────────────────
+renderList();
+if (initFirebase()) {
+  db.ref(NS + '/rsvps').on('value', snap => {
+    rsvps = snap.val() || {};
+    renderList();
+  });
+  db.ref(NS + '/photos').on('value', snap => {
+    const photos = snap.val() || {};
+    Object.keys(photos).forEach(i => setPhoto(Number(i), photos[i]));
+  });
+} else {
+  toast('Offline mode — RSVP needs a connection');
+}
+</script>
+</body>
+</html>
